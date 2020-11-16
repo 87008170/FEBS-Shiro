@@ -5,29 +5,60 @@ package cc.mrbird.febs.common.entity;
  *
  * @author MrBird
  */
-public class FebsConstant {
-
-    // 排序规则：降序
-    public static final String ORDER_DESC = "desc";
-    // 排序规则：升序
-    public static final String ORDER_ASC = "asc";
-
-    // 前端页面路径前缀
-    public static final String VIEW_PREFIX = "febs/views/";
-
-    // 验证码 Session Key
-    public static final String CODE_PREFIX = "febs_captcha_";
-
-    // 允许下载的文件类型，根据需求自己添加（小写）
-    public static final String[] VALID_FILE_TYPE = {"xlsx", "zip"};
+public interface FebsConstant {
 
     /**
-     * {@link cc.mrbird.febs.common.controller.BaseController}
-     * getDataTable 中 HashMap 默认的初始化容量
+     * 注册用户角色ID
      */
-    public static final int DATA_MAP_INITIAL_CAPACITY = 4;
+    Long REGISTER_ROLE_ID = 2L;
+
+    /**
+     * 排序规则：降序
+     */
+    String ORDER_DESC = "desc";
+
+    /**
+     * 排序规则：升序
+     */
+    String ORDER_ASC = "asc";
+
+    /**
+     * 前端页面路径前缀
+     */
+    String VIEW_PREFIX = "febs/views/";
+
+    /**
+     * 验证码 Session Key
+     */
+    String CODE_PREFIX = "febs_captcha_";
+
+    /**
+     * 允许下载的文件类型，根据需求自己添加（小写）
+     */
+    String[] VALID_FILE_TYPE = {"xlsx", "zip"};
+
     /**
      * 异步线程池名称
      */
-    public static final String ASYNC_POOL = "febsAsyncThreadPool";
+    String ASYNC_POOL = "febsAsyncThreadPool";
+
+    /**
+     * 异步线程名称前缀
+     */
+    String ASYNC_THREAD_NAME_PREFIX = "Febs-Async-Thread";
+
+    /**
+     * 任务调度线程前缀
+     */
+    String QUARTZ_THREAD_NAME_PREFIX= "Febs-Job-Thread";
+
+    /**
+     * 开发环境
+     */
+    String DEVELOP = "dev";
+
+    /**
+     * Windows 操作系统
+     */
+    String SYSTEM_WINDOWS = "windows";
 }

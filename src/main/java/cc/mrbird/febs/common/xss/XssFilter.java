@@ -1,9 +1,8 @@
 package cc.mrbird.febs.common.xss;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -19,17 +18,19 @@ import java.util.regex.Pattern;
  *
  * @author MrBird
  */
+@Slf4j
 public class XssFilter implements Filter {
 
-    private static Logger logger = LoggerFactory.getLogger(XssFilter.class);
-    // 是否过滤富文本内容
+    /**
+     * 是否过滤富文本内容
+     */
     private boolean flag = false;
 
-    private List<String> excludes = new ArrayList<>();
+    private final List<String> excludes = new ArrayList<>();
 
     @Override
     public void init(FilterConfig filterConfig) {
-        logger.info("------------ xss filter init ------------");
+        log.info("------------ xss filter init ------------");
         String isIncludeRichText = filterConfig.getInitParameter("isIncludeRichText");
         if (StringUtils.isNotBlank(isIncludeRichText)) {
             flag = BooleanUtils.toBoolean(isIncludeRichText);
@@ -45,12 +46,11 @@ public class XssFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
-        if (handleExcludeURL(req)) {
+        if (handleExcludeUrl(req)) {
             chain.doFilter(request, response);
             return;
         }
-        XssHttpServletRequestWrapper xssRequest = new XssHttpServletRequestWrapper((HttpServletRequest) request,
-                flag);
+        XssHttpServletRequestWrapper xssRequest = new XssHttpServletRequestWrapper((HttpServletRequest) request, flag);
         chain.doFilter(xssRequest, response);
     }
 
@@ -59,8 +59,8 @@ public class XssFilter implements Filter {
         // do nothing
     }
 
-    private boolean handleExcludeURL(HttpServletRequest request) {
-        if (excludes == null || excludes.isEmpty()) {
+    private boolean handleExcludeUrl(HttpServletRequest request) {
+        if (excludes.isEmpty()) {
             return false;
         }
         String url = request.getServletPath();

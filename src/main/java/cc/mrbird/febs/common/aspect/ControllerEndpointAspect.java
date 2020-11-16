@@ -3,28 +3,33 @@ package cc.mrbird.febs.common.aspect;
 import cc.mrbird.febs.common.annotation.ControllerEndpoint;
 import cc.mrbird.febs.common.exception.FebsException;
 import cc.mrbird.febs.common.utils.FebsUtil;
-import cc.mrbird.febs.common.utils.HttpContextUtil;
 import cc.mrbird.febs.monitor.service.ILogService;
+import cc.mrbird.febs.system.entity.User;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.SecurityUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 
 /**
  * @author MrBird
  */
+@Slf4j
 @Aspect
 @Component
-public class ControllerEndpointAspect extends AspectSupport {
+@RequiredArgsConstructor
+public class ControllerEndpointAspect extends BaseAspectSupport {
 
-    @Autowired
-    private ILogService logService;
+    private final ILogService logService;
 
     @Pointcut("@annotation(cc.mrbird.febs.common.annotation.ControllerEndpoint)")
     public void pointcut() {
@@ -40,11 +45,19 @@ public class ControllerEndpointAspect extends AspectSupport {
         try {
             result = point.proceed();
             if (StringUtils.isNotBlank(operation)) {
-                HttpServletRequest request = HttpContextUtil.getHttpServletRequest();
-                logService.saveLog(point, targetMethod, request, operation, start);
+                RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
+                ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) attributes;
+                String ip = StringUtils.EMPTY;
+                if (servletRequestAttributes != null) {
+                    ip = servletRequestAttributes.getRequest().getRemoteAddr();
+                }
+                // 设置操作用户
+                User user = (User) SecurityUtils.getSubject().getPrincipal();
+                logService.saveLog(user, point, targetMethod, ip, operation, start);
             }
             return result;
         } catch (Throwable throwable) {
+            log.error(throwable.getMessage(), throwable);
             String exceptionMessage = annotation.exceptionMessage();
             String message = throwable.getMessage();
             String error = FebsUtil.containChinese(message) ? exceptionMessage + "，" + message : exceptionMessage;

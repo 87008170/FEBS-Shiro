@@ -8,9 +8,9 @@ import cc.mrbird.febs.monitor.entity.SystemLog;
 import cc.mrbird.febs.monitor.service.ILogService;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.wuwenze.poi.ExcelKit;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,10 +27,10 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("log")
+@RequiredArgsConstructor
 public class LogController extends BaseController {
 
-    @Autowired
-    private ILogService logService;
+    private final ILogService logService;
 
     @GetMapping("list")
     @RequiresPermissions("log:view")
@@ -42,7 +42,7 @@ public class LogController extends BaseController {
     @GetMapping("delete/{ids}")
     @RequiresPermissions("log:delete")
     @ControllerEndpoint(exceptionMessage = "删除日志失败")
-    public FebsResponse deleteLogss(@NotBlank(message = "{required}") @PathVariable String ids) {
+    public FebsResponse deleteLogs(@NotBlank(message = "{required}") @PathVariable String ids) {
         String[] logIds = ids.split(StringPool.COMMA);
         this.logService.deleteLogs(logIds);
         return new FebsResponse().success();

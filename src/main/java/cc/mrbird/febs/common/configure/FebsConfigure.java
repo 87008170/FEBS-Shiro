@@ -4,7 +4,7 @@ import cc.mrbird.febs.common.entity.FebsConstant;
 import cc.mrbird.febs.common.properties.FebsProperties;
 import cc.mrbird.febs.common.properties.SwaggerProperties;
 import cc.mrbird.febs.common.xss.XssFilter;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,19 +27,19 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 @Configuration
 @EnableSwagger2
+@RequiredArgsConstructor
 public class FebsConfigure {
 
-    @Autowired
-    private FebsProperties properties;
+    private final FebsProperties properties;
 
     @Bean(FebsConstant.ASYNC_POOL)
-    public ThreadPoolTaskExecutor asyncThreadPoolTaskExecutor(){
+    public ThreadPoolTaskExecutor asyncThreadPoolTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(5);
         executor.setMaxPoolSize(20);
         executor.setQueueCapacity(200);
         executor.setKeepAliveSeconds(30);
-        executor.setThreadNamePrefix("Febs-Async-Thread");
+        executor.setThreadNamePrefix(FebsConstant.ASYNC_THREAD_NAME_PREFIX);
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(60);
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
@@ -51,14 +51,13 @@ public class FebsConfigure {
      * XssFilter Bean
      */
     @Bean
-    @SuppressWarnings("all")
-    public FilterRegistrationBean xssFilterRegistrationBean() {
-        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
+    public FilterRegistrationBean<XssFilter> xssFilterRegistrationBean() {
+        FilterRegistrationBean<XssFilter> filterRegistrationBean = new FilterRegistrationBean<>();
         filterRegistrationBean.setFilter(new XssFilter());
         filterRegistrationBean.setOrder(1);
         filterRegistrationBean.setEnabled(true);
         filterRegistrationBean.addUrlPatterns("/*");
-        Map<String, String> initParameters = new HashMap<>();
+        Map<String, String> initParameters = new HashMap<>(2, 1);
         initParameters.put("excludes", "/favicon.ico,/img/*,/js/*,/css/*");
         initParameters.put("isIncludeRichText", "true");
         filterRegistrationBean.setInitParameters(initParameters);
